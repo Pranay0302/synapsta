@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "paths": {
-      "synapses/*": ["./*"]
+      "synapses/*": ["components/*"]
     }
-  }
+  },
+  "include": ["pages", "components"]
 }
