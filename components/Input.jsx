@@ -6,9 +6,9 @@ export default function Input({ value, onChange, placeholder, onKeyDown }) {
       type="text"
       value={value}
       onChange={onChange}
-      onKeyDown={onKeyDown}
+      onKeyDown={onKeyDown} 
       placeholder={placeholder || ''}
-      style={{ flex: 1, padding: '0.5rem' }}
+      style={{ flex: 1, padding: '0.5rem', borderRadius: '0.5rem'}}
     />
   );
 }
