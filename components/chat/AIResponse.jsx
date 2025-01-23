@@ -67,7 +67,7 @@ export default function AIResponse({
             >
                 <h2 style={{ textAlign: 'center' }}>Search Results</h2>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'space-evenly' }}>
-                    {webResults.slice(0, 6).map((item, idx) => {
+                    {webResults.slice(0, 8).map((item, idx) => {
                         const faviconUrl = new URL(item.url).origin + '/favicon.ico';
                         return (
                             <a

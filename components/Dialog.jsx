@@ -1,3 +1,4 @@
+import { Eye, EyeClosed, CircleX } from 'lucide-react';
 import React, { useState } from 'react';
 
 export default function Dialog({ title, content }) {
@@ -5,8 +6,8 @@ export default function Dialog({ title, content }) {
 
   return (
     <div style={{ marginTop: '1rem' }}>
-      <button onClick={() => setIsOpen(!isOpen)}>
-        {isOpen ? 'Hide Info' : 'Show Info'}
+      <button onClick={() => setIsOpen(!isOpen)} style={{cursor: 'pointer'}}>
+        {isOpen ? <Eye /> : <EyeClosed />}
       </button>
       {isOpen && (
         <div
@@ -23,7 +24,7 @@ export default function Dialog({ title, content }) {
             onClick={() => setIsOpen(false)}
             style={{ position: 'absolute', top: 8, right: 8 }}
           >
-            X
+            <CircleX />
           </button>
         </div>
       )}

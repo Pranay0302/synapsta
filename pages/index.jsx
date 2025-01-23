@@ -1,9 +1,10 @@
+import '../styles/globals.css';
 import { useState, useEffect } from 'react';
 import Input from 'synapses/Input';
 import Button from 'synapses/Button';
 import AIResponse from 'synapses/chat/AIResponse';
-import Accordion from 'synapses/Accordion';
 import Dialog from 'synapses/Dialog';
+import { Send, SquarePen, Menu, ChevronLeft } from 'lucide-react';
 
 export default function Home() {
     const [sessions, setSessions] = useState([]);
@@ -12,24 +13,47 @@ export default function Home() {
     const [searchResults, setSearchResults] = useState(null);
     const [aiQueries, setAiQueries] = useState([]);
     const [error, setError] = useState(null);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
-        const stored = localStorage.getItem('sessions');
-        if (stored) {
-            const parsed = JSON.parse(stored);
-            setSessions(parsed);
-            if (parsed.length > 0) {
-                setCurrentSessionId(parsed[0].id);
-                setQuery(parsed[0].query);
-                setSearchResults(parsed[0].searchResults);
-                setAiQueries(parsed[0].aiQueries);
+        const storedSessions = localStorage.getItem('sessions');
+        const storedSessionId = localStorage.getItem('currentSessionId');
+        if (storedSessions) {
+            const parsedSessions = JSON.parse(storedSessions);
+            setSessions(parsedSessions);
+            if (parsedSessions.length > 0) {
+                if (storedSessionId) {
+                    const parsedId = JSON.parse(storedSessionId);
+                    const found = parsedSessions.find((s) => s.id === parsedId);
+                    if (found) {
+                        setCurrentSessionId(parsedId);
+                        setQuery(found.query);
+                        setSearchResults(found.searchResults);
+                        setAiQueries(found.aiQueries);
+                    } else {
+                        setCurrentSessionId(parsedSessions[0].id);
+                        setQuery(parsedSessions[0].query);
+                        setSearchResults(parsedSessions[0].searchResults);
+                        setAiQueries(parsedSessions[0].aiQueries);
+                    }
+                } else {
+                    setCurrentSessionId(parsedSessions[0].id);
+                    setQuery(parsedSessions[0].query);
+                    setSearchResults(parsedSessions[0].searchResults);
+                    setAiQueries(parsedSessions[0].aiQueries);
+                }
+            } else {
+                createNewChat();
             }
+        } else {
+            createNewChat();
         }
     }, []);
 
     useEffect(() => {
         localStorage.setItem('sessions', JSON.stringify(sessions));
-    }, [sessions]);
+        localStorage.setItem('currentSessionId', JSON.stringify(currentSessionId));
+    }, [sessions, currentSessionId]);
 
     function createNewChat() {
         const newId = Date.now();
@@ -41,7 +65,7 @@ export default function Home() {
             aiQueries: [],
             aiResponse: ''
         };
-        setSessions([...sessions, newSession]);
+        setSessions((prev) => [...prev, newSession]);
         setCurrentSessionId(newId);
         setQuery('');
         setSearchResults(null);
@@ -101,13 +125,9 @@ export default function Home() {
         setError(null);
         try {
             const currentSession = sessions.find((s) => s.id === currentSessionId);
-            if (currentSession && currentSession.searchResults && currentSession.query === query) {
-                return;
-            }
+            if (currentSession && currentSession.searchResults && currentSession.query === query) return;
             const res = await fetch(`/api/brave?q=${encodeURIComponent(query)}`);
-            if (!res.ok) {
-                throw new Error(`Request to Brave API failed with status ${res.status}`);
-            }
+            if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
             const data = await res.json();
             setSearchResults(data);
             const newQueries = data.web?.results?.slice(0, 3).map((item) => item.title) || [];
@@ -115,14 +135,7 @@ export default function Home() {
             setSessions((prev) =>
                 prev.map((s) => {
                     if (s.id === currentSessionId) {
-                        return {
-                            ...s,
-                            title: query,
-                            query,
-                            searchResults: data,
-                            aiQueries: newQueries,
-                            aiResponse: ''
-                        };
+                        return { ...s, title: query, query, searchResults: data, aiQueries: newQueries, aiResponse: '' };
                     }
                     return s;
                 })
@@ -134,79 +147,102 @@ export default function Home() {
 
     const currentSession = sessions.find((s) => s.id === currentSessionId);
 
+    function toggleSidebar() {
+        setSidebarOpen((prev) => !prev);
+    }
+
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '1rem' }}>
-            <h1>Synapsta (Powered by Brave Search & AI)</h1>
-            <div style={{ display: 'flex', gap: '24px' }}>
-                <div style={{ minWidth: '200px', borderRight: '1px solid #ccc', paddingRight: '16px' }}>
-                    <Button onClick={createNewChat}>New Chat</Button>
-                    <div style={{ marginTop: '1rem' }}>
-                        {sessions.length === 0 && <p>No sessions yet.</p>}
-                        {sessions.map((session) => (
-                            <div
-                                key={session.id}
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    cursor: 'pointer',
-                                    padding: '8px',
-                                    borderRadius: '4px',
-                                    backgroundColor: session.id === currentSessionId ? '#e0f7fa' : 'transparent',
-                                    marginBottom: '4px'
-                                }}
-                            >
-                                <div onClick={() => selectSession(session.id)} style={{ flex: 1 }}>
-                                    {session.title || 'Untitled Chat'}
-                                </div>
-                                <div
-                                    onClick={(e) => handleDeleteSession(e, session.id)}
-                                    style={{
-                                        padding: '0 8px',
-                                        cursor: 'pointer',
-                                        fontWeight: 'bold'
-                                    }}
-                                >
-                                    &#10006;
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative' }}>
+            <div style={{ position: 'absolute', left: 10, top: 10 }}>
+                <Button onClick={toggleSidebar} >
+                    <Menu />
+                </Button>
+            </div>
+            <div style={{ position: 'absolute', right: 10, top: 10 }}>
+                <Button onClick={createNewChat} >
+                    <SquarePen />
+                </Button>
+            </div>
+            <h1 style={{ textAlign: 'center', marginTop: '3rem' }}>Synapsta</h1>
+            <div
+                style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    height: '100vh',
+                    backgroundColor: '#f8f9fa',
+                    borderRight: '1px solid #ccc',
+                    padding: '1rem',
+                    overflowY: 'auto',
+                    transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
+                    transition: 'transform 0.3s ease',
+                    width: 300
+                }}
+            >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <h2>Sessions</h2>
+                    <Button onClick={toggleSidebar} >
+                        <ChevronLeft />
+                    </Button>
                 </div>
-                <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem' }}>
-                        <Input
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            placeholder="Search..."
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    handleSearch();
-                                }
-                            }}
-                        />
-                        <Button onClick={handleSearch}>Search</Button>
-                    </div>
-                    {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-                    {currentSession && currentSession.searchResults && (
-                        <div style={{ marginTop: '1rem' }}>
-                            <Accordion title="Raw Brave Search Results">
-                                <pre>{JSON.stringify(currentSession.searchResults, null, 2)}</pre>
-                            </Accordion>
-                            <AIResponse
-                                results={currentSession.searchResults}
-                                queries={currentSession.aiQueries}
-                                sessionId={currentSession.id}
-                                existingProgress={currentSession.aiResponse}
-                                onProgressUpdate={handleProgressUpdate}
-                            />
+                {sessions.length === 0 && <p>No sessions yet.</p>}
+                {sessions.map((session) => (
+                    <div
+                        key={session.id}
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            padding: '8px',
+                            borderRadius: '4px',
+                            backgroundColor: session.id === currentSessionId ? '#e0f7fa' : 'transparent',
+                            marginBottom: '4px'
+                        }}
+                        onClick={() => selectSession(session.id)}
+                    >
+                        <div style={{ flex: 1 }}>
+                            {session.title || 'Untitled Chat'}
                         </div>
-                    )}
-                    <Dialog
-                        title="About This App"
-                        content="This is a simple AI-powered search engine that uses the Brave Search API for web results and OpenAI (gpt-3.5-turbo) for AI responses. Many other models will be added."
+                        <div
+                            onClick={(e) => handleDeleteSession(e, session.id)}
+                            style={{ padding: '0 8px', cursor: 'pointer', fontWeight: 'bold' }}
+                        >
+                            &#10006;
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <div style={{ marginLeft: sidebarOpen ? 300 : 0, transition: 'margin-left 0.3s ease', padding: '1rem' }}>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem' }}>
+                    <Input
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Search..."
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSearch();
+                        }}
                     />
+                    <Button onClick={handleSearch} >
+                        <Send />
+                    </Button>
                 </div>
+                {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+                {currentSession && currentSession.searchResults && (
+                    <div style={{ marginTop: '1rem' }}>
+                        <AIResponse
+                            results={currentSession.searchResults}
+                            queries={currentSession.aiQueries}
+                            sessionId={currentSession.id}
+                            existingProgress={currentSession.aiResponse}
+                            onProgressUpdate={handleProgressUpdate}
+                        />
+                    </div>
+                )}
+                <Dialog
+                    title="About This App"
+                    content="This is a simple AI-powered search engine that uses the Brave Search API for web results and OpenAI for AI responses."
+                />
             </div>
         </div>
     );

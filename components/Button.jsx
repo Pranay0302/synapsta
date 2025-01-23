@@ -6,7 +6,7 @@ export default function Button({ children, onClick }) {
       onClick={onClick}
       style={{
         padding: '0.5rem 1rem',
-        backgroundColor: '#0070f3',
+        backgroundColor: '#CBCBCB',
         color: '#fff',
         border: 'none',
         borderRadius: '4px',
