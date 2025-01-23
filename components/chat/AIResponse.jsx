@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import openaiHandler from '../../pages/api/openaiHandler';
 import { marked } from 'marked';
+import markedKatex from 'marked-katex-extension';
+import 'katex/dist/katex.min.css';
+
+marked.use(
+    markedKatex({
+        throwOnError: false
+    })
+);
 
 marked.setOptions({
     gfm: true,
@@ -62,7 +70,7 @@ export default function AIResponse({
                     marginTop: '1rem',
                     border: '1px solid #ccc',
                     borderRadius: '8px',
-                    padding: '1rem',
+                    padding: '1rem'
                 }}
             >
                 <h2 style={{ textAlign: 'center' }}>Search Results</h2>
@@ -87,7 +95,7 @@ export default function AIResponse({
                                     textDecoration: 'none',
                                     color: '#333',
                                     transition: 'background-color 0.3s',
-                                    overflow: 'hidden',
+                                    overflow: 'hidden'
                                 }}
                                 title={item.title}
                                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e0e0e0')}
@@ -107,7 +115,7 @@ export default function AIResponse({
                                         minWidth: 0,
                                         whiteSpace: 'nowrap',
                                         overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
+                                        textOverflow: 'ellipsis'
                                     }}
                                 >
                                     {item.title}
@@ -133,7 +141,7 @@ export default function AIResponse({
                         marginTop: '1rem',
                         fontSize: '1rem',
                         lineHeight: '1.5',
-                        color: '#333',
+                        color: '#333'
                     }}
                 />
             </div>
