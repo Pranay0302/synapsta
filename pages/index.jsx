@@ -1,4 +1,3 @@
-import '../styles/globals.css';
 import { useState, useEffect } from 'react';
 import Input from 'synapses/Input';
 import Button from 'synapses/Button';
