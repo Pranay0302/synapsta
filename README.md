@@ -1,6 +1,6 @@
 # Synapsta: The AI-Powered Web Search Engine
 
-Synapsta is an innovative AI-powered search engine designed to deliver accurate and comprehensive answers to your queries.
+Synapsta is an innovative AI-powered web search engine designed to deliver accurate and comprehensive answers to your queries.
 
 ## Features
 
@@ -31,3 +31,8 @@ Synapsta is an innovative AI-powered search engine designed to deliver accurate 
 
 ### 4. Zettlekasten Approach
 - Introducing zettlekasten method to store and organize data in an efficient manner.
+
+
+v1.0.0
+
+![drawio00](/public/lib/imgs/image.png)
