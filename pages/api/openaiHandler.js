@@ -21,7 +21,7 @@ const openaiHandler = {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
+          model: 'gpt-4o-mini',
           messages: [{ role: 'user', content: combinedQuery }],
           max_tokens: 1024,
           temperature: 0.7,
